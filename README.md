@@ -85,8 +85,8 @@ object overview
 		warmupCycles	<number>
 		run				<function>
 
-		constructor		<function>
 		prototype		<object>
+			constructor		<function>
 			rounds			<number>
 			calls			<number>
 			details			<boolean>
