@@ -149,18 +149,22 @@ class Speed
 
 	warmup= -> n= n for n in [1..Speed.warmupCycles]
 
+
+	resolveNameFunc= ( ctx, name, func ) ->
+		if _.isFunction name
+			func= name
+			name= 'anonymus-'+ ++ctx.anonymusCount
+		return [ name, func ]
+
 #
 #															Speed Static part
 #
 
-	@formatInterval: 3
-	@formatChar		: '.'
 	@details			: false
 	@rounds			: 1
 	@calls			: 1
 	@maxCalls		: 100000000
 	@warmupCycles	: 1000000
-
 
 
 	@run: ( callback, calls, rounds, details, name= 'anonymus' ) ->
@@ -173,7 +177,7 @@ class Speed
 
 		return if tooMany rounds* calls
 
-		console.log '*speed-test* -> "'+name + '", run '+ format(rounds)+ ' rounds ' + format(calls)+ ' calls'
+		console.log '*speed.js* -> "'+name + '", run '+ format(rounds)+ ' rounds ' + format(calls)+ ' calls'
 
 		warmup()
 
@@ -204,16 +208,17 @@ class Speed
 		@anonymusCount	= 0
 
 	add: ( name, func ) ->
-		if _.isFunction name
-			func= name
-			name= 'anonymus-'+ ++@anonymusCount
+		[ name, func ]= resolveNameFunc @, name, func
 		@callbacks[ name ]= func if ( not @callbacks[name] ) and _.isFunction func
 		return @
 
 	run: ( name, func ) ->
-		@add name, func
-		for name, callback of @callbacks
-			Speed.run callback, @calls, @rounds, @details, name
+		[ name, func ]= resolveNameFunc @, name, func
+		if name?
+			Speed.run func, @calls, @rounds, @details, name
+		else
+			for name, callback of @callbacks
+				Speed.run callback, @calls, @rounds, @details, name
 		return @
 
 # end of Speed

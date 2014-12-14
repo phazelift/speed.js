@@ -5,7 +5,7 @@ speed.js
 
 <br/>
 ___
-**A basic example**
+**example**
 ```javascript
 var Speed= require( 'speed.js' );
 
@@ -27,21 +27,21 @@ test
 
 // run them all
 test.run();
-// *speed-test* -> "create Object instances", run 3 rounds 10.000.000 calls
+// *speed.js* -> "create Object instances", run 3 rounds 10.000.000 calls
 // round: 1:    469 ms
 // round: 2:    447 ms
 // round: 3:    449 ms
 // average time for  10.000.000 calls :    455 ms
 // total time for    30.000.000 calls :  1.367 ms
 //
-// *speed-test* -> "create Object literals", run 3 rounds 10.000.000 calls
+// *speed.js* -> "create Object literals", run 3 rounds 10.000.000 calls
 // round: 1:    110 ms
 // round: 2:     42 ms
 // round: 3:     42 ms
 // average time for  10.000.000 calls :     65 ms
 // total time for    30.000.000 calls :    195 ms
 ```
-As you can see in the output, despite the internal warmup function, the first round always takes more time to run.
+Despite the internal warmup function, the first round always takes more time to run.
 Therefore, always run multiple rounds and look at the averages and total time elapsed.
 
 Of course the milliseconds elapsed are system and setup specific, and are only of value for comparing algorithms
@@ -70,14 +70,10 @@ ___
 API
 ===
 
-Should follow soon..
-
 ```html
 object overview
 
 	Speed			<object>
-		formatInterval	<number>
-		formatChar		<string>
 		details			<boolean>
 		rounds			<number>
 		calls			<number>
@@ -95,7 +91,91 @@ object overview
 ```
 ___
 
+Speed
+=====
 
+
+**Speed.details**
+> `<boolean> Speed.details`
+
+Set to show measurements for every round. This is a global fallback setting, defaults to false.
+___
+**Speed.rounds**
+> `<number> Speed.rounds`
+
+This is a global fallback setting, defaults to 1.
+___
+**Speed.calls**
+> `<number> Speed.calls`
+
+This is a global fallback setting, defaults to 1.
+___
+**Speed.maxCalls**
+> `<number> Speed.maxCalls`
+
+This is a global fallback setting.
+
+Defaults to 100.000.000 function calls. Can be set to any value, to prevent accidently launching a test that could
+take hours to complete or hang your system..
+___
+**Speed.warmupCycles**
+> `<number> Speed.warmupCycles`
+
+Defaults to 1.000.000 cycles.
+___
+**Speed.run**
+> `<function> Speed.run( callback, calls, rounds, details, name= 'anonymus' )`
+
+The static method available, can instanlty run a test.
+```javascript
+Speed.run( function(){
+	var speed= new Speed();
+}, 100000, 8);
+```
+___
+### prototype
+___
+**Speed.prototype.constructor**
+> `<function> constructor( <object> settings )`
+
+.rounds, .calls and .details can be pre-set via settings.
+___
+**Speed.prototype.callbacks**
+> `<object> callbacks`
+
+An object holding all functions added with .add or .run
+___
+**Speed.prototype.rounds**
+> `<number> rounds`
+
+___
+**Speed.prototype.calls**
+> `<number> calls`
+
+___
+**Speed.prototype.details**
+> `<boolean> details`
+
+___
+**Speed.prototype.add**
+> `<function> add( name= 'anonymus', callback )`
+
+Adds a function to the tests
+___
+**Speed.prototype.run**
+> `<function> run( name= 'anonymus', callback )`
+
+Runs all functions set with .add. If name and/or callback is set, .run will override the already added functions,
+not running them. This can come in handy if you have some tests set up, and you want to do some quick manual test
+apart from the others.
+```javascript
+var speed= new Speed();
+
+speed.run( function(){
+	var thisThing= 'inhibiting the other tests..';
+}, 1000000, 5);
+```
+___
 
 ___
 change log

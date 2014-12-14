@@ -172,7 +172,7 @@
   };
 
   Speed = (function() {
-    var align, format, tooMany, warmup;
+    var align, format, resolveNameFunc, tooMany, warmup;
 
     format = function(nr, interval, char) {
       var formatted, index, length, pos, _i;
@@ -238,9 +238,13 @@
       return _results;
     };
 
-    Speed.formatInterval = 3;
-
-    Speed.formatChar = '.';
+    resolveNameFunc = function(ctx, name, func) {
+      if (_.isFunction(name)) {
+        func = name;
+        name = 'anonymus-' + ++ctx.anonymusCount;
+      }
+      return [name, func];
+    };
 
     Speed.details = false;
 
@@ -266,7 +270,7 @@
       if (tooMany(rounds * calls)) {
         return;
       }
-      console.log('*speed-test* -> "' + name + '", run ' + format(rounds) + ' rounds ' + format(calls) + ' calls');
+      console.log('*speed.js* -> "' + name + '", run ' + format(rounds) + ' rounds ' + format(calls) + ' calls');
       warmup();
       kickOff = Date.now();
       for (round = _i = 1; 1 <= rounds ? _i <= rounds : _i >= rounds; round = 1 <= rounds ? ++_i : --_i) {
@@ -295,10 +299,8 @@
     }
 
     Speed.prototype.add = function(name, func) {
-      if (_.isFunction(name)) {
-        func = name;
-        name = 'anonymus-' + ++this.anonymusCount;
-      }
+      var _ref;
+      _ref = resolveNameFunc(this, name, func), name = _ref[0], func = _ref[1];
       if ((!this.callbacks[name]) && _.isFunction(func)) {
         this.callbacks[name] = func;
       }
@@ -306,12 +308,16 @@
     };
 
     Speed.prototype.run = function(name, func) {
-      var callback, _ref;
-      this.add(name, func);
-      _ref = this.callbacks;
-      for (name in _ref) {
-        callback = _ref[name];
-        Speed.run(callback, this.calls, this.rounds, this.details, name);
+      var callback, _ref, _ref1;
+      _ref = resolveNameFunc(this, name, func), name = _ref[0], func = _ref[1];
+      if (name != null) {
+        Speed.run(func, this.calls, this.rounds, this.details, name);
+      } else {
+        _ref1 = this.callbacks;
+        for (name in _ref1) {
+          callback = _ref1[name];
+          Speed.run(callback, this.calls, this.rounds, this.details, name);
+        }
       }
       return this;
     };
