@@ -246,6 +246,8 @@
       return [name, func];
     };
 
+    Speed.Types = Types;
+
     Speed.details = false;
 
     Speed.rounds = 1;

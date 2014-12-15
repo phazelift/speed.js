@@ -47,7 +47,6 @@ Therefore, always run multiple rounds and look at the averages and total time el
 Of course the milliseconds elapsed are system and setup specific, and are only of value for comparing algorithms
 on a specific system.
 ___
-
 #### node.js
 
 Install with npm: `npm install speed.js`, then
@@ -61,10 +60,20 @@ Make Speed global in the browser.
 <script src="path/to/speed.min.js"></script>
 ```
 ___
+#### included
+
+types.js essential type-checker/enforcer is included in speed.js.  It's API can be found at: https://github.com/phazelift/types.js
+You can access it like so:
+```javascript
+var _= Speed.Types;
+```
+___
 #### disclaimer
 
 speed.js is not a 100% accurate and scientific benchmark tool for everything Javascript. It is just a quick
 rudimentary test-tool to help you compare the running speed of different algorithms while optimizing for speed.
+
+For more advanced testing I'd recommend benchmark.
 ___
 
 API

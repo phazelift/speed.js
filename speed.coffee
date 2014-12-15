@@ -160,6 +160,7 @@ class Speed
 #															Speed Static part
 #
 
+	@Types			: Types
 	@details			: false
 	@rounds			: 1
 	@calls			: 1
