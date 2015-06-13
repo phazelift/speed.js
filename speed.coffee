@@ -160,11 +160,13 @@ class Speed
 #															Speed Static part
 #
 
-	@Types			: Types
+	@Types				: Types
+
+	# static defaults
 	@details			: false
-	@rounds			: 1
-	@calls			: 1
-	@maxCalls		: 100000000
+	@rounds				: 1
+	@calls				: 1
+	@maxCalls			: 100000000
 	@warmupCycles	: 1000000
 
 
@@ -172,19 +174,19 @@ class Speed
 
 		return console.log name if not callback= _.forceFunction callback, null
 
-		rounds			= _.forceNumber rounds, Speed.rounds
+		rounds		= _.forceNumber rounds, Speed.rounds
 		calls			= _.forceNumber calls, Speed.calls
 		details		= _.forceBoolean details, Speed.details
 
 		return if tooMany rounds* calls
 
-		console.log '*speed.js* -> "'+name + '", run '+ format(rounds)+ ' rounds ' + format(calls)+ ' calls'
+		console.log '*speed.js* -> "'+name + '", '+ format(rounds)+ ' rounds ' + format(calls)+ ' calls'
 
 		warmup()
 
 		kickOff= Date.now()
 		for round in [1..rounds]
-			count	= 1
+			count	= 0
 			start	= Date.now()
 			callback() while count++ < calls
 			end	= Date.now()
@@ -225,7 +227,7 @@ class Speed
 # end of Speed
 #----------------------------------------------------------------------------------------------
 
-if window?
-	window.Speed= Speed
-else if module?
+if module?
 	module.exports= Speed
+else if window?
+	window.Speed= Speed
