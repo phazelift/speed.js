@@ -1,10 +1,19 @@
 {
   "name": "speed.js",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A quick rudimentary speed test for algorithms",
   "main": "speed.min.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "uglify": "uglifyjs speed.js -c -m -o speed.min.js",
+    "build": "coffee -c --transpile speed.coffee && npm run uglify",
+    "test": "sh -c 'node test.js $*'"
+  },
+  "dependencies": {
+    "types.js": "latest"
+  },
+  "devDependencies": {
+    "@babel/core": "latest",
+    "@babel/preset-env": "latest"
   },
   "repository": {
     "type": "git",

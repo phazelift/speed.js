@@ -17,100 +17,12 @@
 
 "use strict"
 
-#---------------------------------------------------------------------------------------------------
-#
-#												from types.js v1.5.1
-#
+Types	= _ = require 'types.js'
+fs		= require 'fs'
+util	= require 'util'
 
-instanceOf	= ( type, value ) -> value instanceof type
-# type defaults to object, for internal can do, saves for a few bytes..
-typeOf		= ( value, type= 'object' ) -> typeof value is type
-
-LITERALS=
-	'Boolean'	: false
-	'String'		: ''
-	'Object'		: {}
-	'Array'		: []
-	'Function'	: ->
-	'Number'		: do ->
-		number= new Number
-		number.void= true
-		return number
-
-TYPES=
-	'Undefined'		: ( value ) -> value is undefined
-	'Null'			: ( value ) -> value is null
-	'Function'		: ( value ) -> typeOf value, 'function'
-	'Boolean'		: ( value ) -> typeOf value, 'boolean'
-	'String'			: ( value ) -> typeOf value, 'string'
-	'Array'			: ( value ) -> typeOf(value) and instanceOf Array, value
-	'RegExp'			: ( value ) -> typeOf(value) and instanceOf RegExp, value
-	'Date'			: ( value ) -> typeOf(value) and instanceOf Date, value
-	'Number'			: ( value ) -> typeOf(value, 'number') and (value is value) or ( typeOf(value) and instanceOf(Number, value) )
-	'Object'			: ( value ) -> typeOf(value) and (value isnt null) and not instanceOf(Boolean, value) and not instanceOf(Number, value) and not instanceOf(Array, value) and not instanceOf(RegExp, value) and not instanceOf(Date, value)
-	'NaN'				: ( value ) -> typeOf(value, 'number') and (value isnt value)
-	'Defined'		: ( value ) -> value isnt undefined
-
-TYPES.StringOrNumber= (value) -> TYPES.String(value) or TYPES.Number(value)
-
-Types= _=
-	parseIntBase: 10
-
-createForce= ( type ) ->
-
-	convertType= ( value ) ->
-		switch type
-			when 'Number' then return value if (_.isNumber value= parseInt value, _.parseIntBase) and not value.void
-			when 'String' then return value+ '' if _.isStringOrNumber value
-			else return value if Types[ 'is'+ type ] value
-
-	return ( value, replacement ) ->
-		return value if value? and undefined isnt value= convertType value
-		return replacement if replacement? and undefined isnt replacement= convertType replacement
-		return LITERALS[ type ]
-
-
-testValues= ( predicate, breakState, values= [] ) ->
-	return ( predicate is TYPES.Undefined ) if values.length < 1
-	for value in values
-		return breakState if predicate(value) is breakState
-	return not breakState
-
-breakIfEqual= true
-do -> for name, predicate of TYPES then do ( name, predicate ) ->
-
-	Types[ 'is'+ name ]	= predicate
-	Types[ 'not'+ name ]	= ( value ) -> not predicate value
-	Types[ 'has'+ name ]	= -> testValues predicate, breakIfEqual, arguments
-	Types[ 'all'+ name ]	= -> testValues predicate, not breakIfEqual, arguments
-	Types[ 'force'+ name ]= createForce name if name of LITERALS
-
-#
-# end of types.js selection
-#-----------------------------------------------------------------------------------------------------------
-#
-#														from tools.js v0.1.4
-
-extend= ( target= {}, source, append ) ->
-	for key, value of source
-		if _.isObject value
-     		extend target[ key ], value, append
-      else
-			target[ key ]= value if not ( append and target.hasOwnProperty key )
-	return target
-
-_.append= ( target, source ) -> extend _.forceObject( target ), _.forceObject( source ), true
-
-#
-#----------------------------------------------------------------------------------------------------------
-#
-
-#--------------------------------------------------------------------------------------
 
 class Speed
-
-#														Speed Private part
-#
 
 	format= ( nr, interval= 3, char= '.' ) ->
 		return '' if '' is nr= _.forceString nr
@@ -143,46 +55,41 @@ class Speed
 
 	tooMany= ( calls ) ->
 		if calls > Speed.maxCalls
-			console.log 'You are trying to run more than '+ format(Speed.maxCalls)+ ' calls, increase Speed.maxCalls if you really want this.'
-			console.log 'Aborting..'
+			log 'You are trying to run more than '+ format(Speed.maxCalls)+ ' calls, increase Speed.maxCalls if you really want this.'
+			log 'Aborting..'
 			return true
-
-	warmup= -> n= n for n in [1..Speed.warmupCycles]
 
 
 	resolveNameFunc= ( ctx, name, func ) ->
 		if _.isFunction name
-			func= name
-			name= 'anonymus-'+ ++ctx.anonymusCount
+			func = name
+			name = 'anonymus'
+		name = ++ctx.callbackCount + ': ' + name 
 		return [ name, func ]
 
-#
-#															Speed Static part
-#
 
 	@Types				: Types
 
-	# static defaults
-	@details			: false
+	@details				: false
 	@rounds				: 1
 	@calls				: 1
 	@maxCalls			: 100000000
-	@warmupCycles	: 1000000
+	@file					: './speed.log'
+	@log					: (args...) -> console.log args...
 
 
-	@run: ( callback, calls, rounds, details, name= 'anonymus' ) ->
 
-		return console.log name if not callback= _.forceFunction callback, null
+	@run: ( callback, calls, rounds, details, name= 'anonymus', warmup ) ->
+
+		return Speed.log(name) if not callback= _.forceFunction callback, null
 
 		rounds		= _.forceNumber rounds, Speed.rounds
 		calls			= _.forceNumber calls, Speed.calls
 		details		= _.forceBoolean details, Speed.details
 
-		return if tooMany rounds* calls
+		return if tooMany (rounds * calls)
 
-		console.log '*speed.js* -> "'+name + '", '+ format(rounds)+ ' rounds ' + format(calls)+ ' calls'
-
-		warmup()
+		if not warmup then Speed.log name + ': ' + format(rounds) + ' rounds of ' + format(calls) + ' calls..'
 
 		kickOff= Date.now()
 		for round in [1..rounds]
@@ -190,42 +97,55 @@ class Speed
 			start	= Date.now()
 			callback() while count++ < calls
 			end	= Date.now()
-			if details
-				console.log 'round: '+ round+ ': '+ align ( (end- start)+ ' ms' ), 9
+			if details and not warmup then Speed.log 'round: '+ round+ ': '+ align ( (end- start)+ ' ms' ), 9
 
 		totalElapsed= Date.now()- kickOff
 		average= format ~~( totalElapsed/ rounds )
 
 		totalElapsed= format totalElapsed
-		console.log 'average time for '+ align( format(calls)+ ' calls : ' )+ align (average+ ' ms'), 9
-		console.log 'total time for   '+ align( format(calls* rounds)+ ' calls : ' )+ align (totalElapsed+ ' ms'), 9
-		console.log()
+		if not warmup
+			Speed.log 'average time for '+ align( format(calls)+ ' calls : ' )+ align (average+ ' ms'), 9
+			Speed.log 'total time for   '+ align( format(calls* rounds)+ ' calls : ' )+ align (totalElapsed+ ' ms'), 9
+			Speed.log()
 
-#
-#															Speed Dynamic part
-#
+
 
 	constructor: ( settings ) ->
-		_.append this, settings
+		settings			= _.forceObject( settings );
+		@rounds			= _.forceNumber( settings.rounds, Speed.rounds );			
+		@calls			= _.forceNumber( settings.calls, Speed.calls );			
+		@details			= _.forceBoolean( settings.details, Speed.details );			
 		@callbacks		= {}
-		@anonymusCount	= 0
+		@callbackCount	= 0
 
-	add: ( name, func ) ->
-		[ name, func ]= resolveNameFunc @, name, func
+		if settings.file
+			@filename = _.forceString( settings.file, Speed.file );
+			@logFile = fs.createWriteStream @filename, {flags: 'w'}
+			Speed.log = (args...) =>
+				@logFile.write util.format args + '\n';
+				console.log args...
+
+
+	add: ( _name, _func ) =>
+		[ name, func ]= resolveNameFunc @, _name, _func
 		@callbacks[ name ]= func if ( not @callbacks[name] ) and _.isFunction func
 		return @
 
-	run: ( name, func ) ->
-		[ name, func ]= resolveNameFunc @, name, func
-		if name?
+	run: ( _name, _func ) ->
+		Speed.log '*speed.js* - running ' + @callbackCount + ' tests..' + '\n'
+		if _.isFunction _name and not _func
+			# this first call with last argument is for warmup round without logging
+			Speed.run func, @calls, @rounds, @details, name, true
 			Speed.run func, @calls, @rounds, @details, name
-		else
+		else	# run all tests
+			Speed.run callback, @calls, @rounds, @details, name, true
 			for name, callback of @callbacks
 				Speed.run callback, @calls, @rounds, @details, name
+		if @logFile then console.log "done! test results have been saved to:", @filename, '\n'
 		return @
 
-# end of Speed
-#----------------------------------------------------------------------------------------------
+
+
 
 if module?
 	module.exports= Speed
