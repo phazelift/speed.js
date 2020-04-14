@@ -2,11 +2,11 @@ speed.js
 ========
 <br/>
 
-#####A quick rudimentary console speed/benchmark test for algorithms
+**A quick rudimentary console speed/benchmark test for algorithms**
 
 - create multiple speed tests in a snap
 - run all tests at once
-- output test results to console or file
+- output test results to console and file
 - runs warmup round internally 
 
 <br/>
@@ -50,7 +50,7 @@ test.run();
 // done! test results have been saved to: ./speed.log
 
 ```
-Of course the actual milliseconds elapsed are system and setup specific.
+Actual milliseconds elapsed are system and setup specific of course.
 ___
 
 #### node.js
@@ -165,11 +165,11 @@ change log
 
 **0.1.5**
 
-adds log file option
-adds babel transpiler stage for more stable build
-use last update of dependency
-adds test script, run with: npm run test
-update readme
+- adds log file option
+- adds babel transpiler stage for more stable build
+- use last update of dependency
+- adds test script, run with: npm run test
+- update readme
 ___
 
 **0.1.0**
