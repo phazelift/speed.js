@@ -19,7 +19,7 @@ const test= new Speed({
 	rounds	: 3,		// 3 rounds
 	calls	: 10000000,	// 10.000.000 function calls per round
 	details	: false		// set true to show details for each round
-	file	: './speed.log'	// write log output also to file
+	file	: './speed.log'	// write log output also to file(optional)
 
 });
 

@@ -51,7 +51,7 @@ class Speed
 			return aligned+ string
 		return string+ aligned
 
-	align.right	= true;
+	align.right	= true
 
 	tooMany= ( calls ) ->
 		if calls > Speed.maxCalls
@@ -64,7 +64,7 @@ class Speed
 		if _.isFunction name
 			func = name
 			name = 'anonymus'
-		name = ++ctx.callbackCount + ': ' + name 
+		name = ++ctx.callbackCount + ': ' + name
 		return [ name, func ]
 
 
@@ -111,18 +111,18 @@ class Speed
 
 
 	constructor: ( settings ) ->
-		settings			= _.forceObject( settings );
-		@rounds			= _.forceNumber( settings.rounds, Speed.rounds );			
-		@calls			= _.forceNumber( settings.calls, Speed.calls );			
-		@details			= _.forceBoolean( settings.details, Speed.details );			
+		settings			= _.forceObject settings
+		@rounds			= _.forceNumber settings.rounds, Speed.rounds
+		@calls			= _.forceNumber settings.calls, Speed.calls
+		@details			= _.forceBoolean settings.details, Speed.details
 		@callbacks		= {}
 		@callbackCount	= 0
 
 		if settings.file
-			@filename = _.forceString( settings.file, Speed.file );
+			@filename = _.forceString settings.file, Speed.file
 			@logFile = fs.createWriteStream @filename, {flags: 'w'}
 			Speed.log = (args...) =>
-				@logFile.write util.format args + '\n';
+				@logFile.write util.format args + '\n'
 				console.log args...
 
 
